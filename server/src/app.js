@@ -1,11 +1,23 @@
 const express = require('express');
 const cors = require('cors');
+const passport = require('passport');
+require('./config/passport'); // Passport config
+
+const authRoutes = require('./routes/authRoutes');
+const projectRoutes = require('./routes/projectRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
+app.use(passport.initialize());
+
+app.use('/auth', authRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Health Check Route
 app.get('/api/health', (req, res) => {
@@ -16,7 +28,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Root Route (optional, just to show something)
 app.get('/', (req, res) => {
   res.send('ShopSmart Backend Service');
 });
