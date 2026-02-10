@@ -1,7 +1,7 @@
 const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
 const Cart = require('../models/Cart');
-const Project = require('../models/Project');
+const Product = require('../models/Product');
 const User = require('../models/User');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -11,7 +11,7 @@ exports.addOrderItems = async (req, res) => {
     try {
         // 1. Get User's Cart
         const user = await User.findByPk(req.user.id, {
-            include: { model: Project, as: 'cartItems' }
+            include: { model: Product, as: 'cartItems' }
         });
 
         if (!user.cartItems || user.cartItems.length === 0) {
@@ -32,7 +32,7 @@ exports.addOrderItems = async (req, res) => {
         for (const item of user.cartItems) {
             await OrderItem.create({
                 orderId: order.id,
-                projectId: item.id,
+                productId: item.id,
                 price: item.price
             });
         }
@@ -53,7 +53,7 @@ exports.getOrderById = async (req, res) => {
         const order = await Order.findByPk(req.params.id, {
             include: [
                 { model: User, attributes: ['name', 'email'] },
-                { model: Project, through: { attributes: ['price'] } } // Include projects in order
+                { model: Product, through: { attributes: ['price'] } } // Include products in order
             ]
         });
 
@@ -117,7 +117,7 @@ exports.createCheckoutSession = async (req, res) => {
     try {
         const order = await Order.findByPk(req.params.id, {
             include: {
-                model: Project,
+                model: Product,
                 through: { attributes: ['price'] }
             }
         });
@@ -130,16 +130,16 @@ exports.createCheckoutSession = async (req, res) => {
             return res.status(401).json({ message: 'Not authorized' });
         }
 
-        const line_items = order.Projects.map(project => {
+        const line_items = order.Products.map(product => {
             return {
                 price_data: {
                     currency: 'usd',
                     product_data: {
-                        name: project.title,
-                        description: project.description ? project.description.substring(0, 100) : 'Digital Product',
-                        images: [project.image],
+                        name: product.name,
+                        description: product.description ? product.description.substring(0, 100) : 'Product',
+                        images: product.imageUrl ? [product.imageUrl] : [],
                     },
-                    unit_amount: Math.round(project.OrderItem.price * 100),
+                    unit_amount: Math.round(product.OrderItem.price * 100),
                 },
                 quantity: 1,
             };

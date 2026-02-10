@@ -1,5 +1,5 @@
 const Cart = require('../models/Cart');
-const Project = require('../models/Project');
+const Product = require('../models/Product');
 const User = require('../models/User');
 
 // @desc    Get user cart
@@ -8,7 +8,7 @@ exports.getCart = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id, {
             include: {
-                model: Project,
+                model: Product,
                 as: 'cartItems',
                 through: {
                     attributes: ['id'] // Include Cart ID to allow removal
@@ -25,17 +25,17 @@ exports.getCart = async (req, res) => {
 // @desc    Add item to cart
 // @route   POST /api/cart
 exports.addToCart = async (req, res) => {
-    const { projectId } = req.body;
+    const { productId } = req.body;
 
     try {
-        const project = await Project.findByPk(projectId);
-        if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
+        const product = await Product.findByPk(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
         }
 
         // Check if already in cart
         const existingItem = await Cart.findOne({
-            where: { userId: req.user.id, projectId: projectId }
+            where: { userId: req.user.id, productId: productId }
         });
 
         if (existingItem) {
@@ -44,7 +44,7 @@ exports.addToCart = async (req, res) => {
 
         const cartItem = await Cart.create({
             userId: req.user.id,
-            projectId: projectId
+            productId: productId
         });
 
         res.status(201).json(cartItem);
@@ -57,17 +57,11 @@ exports.addToCart = async (req, res) => {
 // @route   DELETE /api/cart/:id
 exports.removeFromCart = async (req, res) => {
     try {
-        // We expect the Cart Table ID here, not Project ID, for simplicity in "deleting a cart item"
-        // Or we can delete by projectId. let's assume valid Cart ID or Project ID. 
-        // Actually, usually frontend sends Project ID to remove. Let's support removing by Project ID for standard e-com feel
-        // OR we can pass the Cart Item ID. 
-        // Let's stick to REST: DELETE /api/cart/:id -> where :id is the ProjectId or CartId?
-        // Let's assume :id is projectId for better UX "remove this project".
-
+        // We expect the Product ID here to remove from cart
         const deleted = await Cart.destroy({
             where: {
                 userId: req.user.id,
-                projectId: req.params.id
+                productId: req.params.id
             }
         });
 

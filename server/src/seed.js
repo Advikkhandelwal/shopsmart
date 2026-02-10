@@ -1,5 +1,4 @@
-const { sequelize, User, Project } = require('./models/index');
-const bcrypt = require('bcryptjs');
+const { sequelize, User, Product } = require('./models/index');
 
 const seedData = async () => {
     try {
@@ -7,10 +6,6 @@ const seedData = async () => {
         console.log('Database synced');
 
         // Create Users
-        // Since we are using Google Auth, password is secondary but we can seed one admin for manual testing if needed
-        // But our User model doesn't strictly enforce password if googleId is there.
-        // For seeding let's just create dummy users.
-
         await User.create({
             name: 'Admin User',
             email: 'admin@example.com',
@@ -27,44 +22,119 @@ const seedData = async () => {
 
         console.log('Users seeded');
 
-        // Create Projects
-        const projects = [
+        // Create Products
+        const products = [
+            // Electronics
             {
-                title: 'Chat App using MERN',
-                description: 'A full-featured real-time chat application using MongoDB, Express, React, and Node.js. Includes authentication, rooms, and messaging.',
-                price: 49.99,
-                category: 'Web Development',
-                image: 'https://images.unsplash.com/photo-1555421689-d68471e189f2?auto=format&fit=crop&w=500&q=60',
-                fileUrl: 'https://example.com/downloads/chat-app.zip'
+                name: 'Smartphone X Pro',
+                description: 'Latest model with high-resolution camera and long battery life.',
+                price: 999.99,
+                category: 'Electronics',
+                stock: 50,
+                imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=60'
             },
             {
-                title: 'E-commerce Website React',
-                description: 'Production-ready e-commerce template with cart, checkout, and admin dashboard.',
-                price: 79.99,
-                category: 'Web Development',
-                image: 'https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&w=500&q=60',
-                fileUrl: 'https://example.com/downloads/ecommerce.zip'
+                name: 'Laptop Ultra 15',
+                description: 'Powerful laptop for professionals and gamers.',
+                price: 1299.99,
+                category: 'Electronics',
+                stock: 30,
+                imageUrl: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=500&q=60'
             },
+
+            // Clothes & Fashion
             {
-                title: 'AI Chatbot Python',
-                description: 'Python-based chatbot using NLP and Machine Learning libraries. Easy to integrate.',
-                price: 29.99,
-                category: 'AI & Machine Learning',
-                image: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?auto=format&fit=crop&w=500&q=60',
-                fileUrl: 'https://example.com/downloads/chatbot.zip'
-            },
-            {
-                title: 'Portfolio Website',
-                description: 'Sleek and modern portfolio website template for developers and designers.',
+                name: 'Classic White T-Shirt',
+                description: 'Premium cotton t-shirt, comfortable and stylish.',
                 price: 19.99,
-                category: 'Web Design',
-                image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=500&q=60',
-                fileUrl: 'https://example.com/downloads/portfolio.zip'
+                category: 'Clothes',
+                stock: 100,
+                imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=500&q=60'
+            },
+            {
+                name: 'Denim Jacket',
+                description: 'Vintage style denim jacket for all seasons.',
+                price: 59.99,
+                category: 'Clothes',
+                stock: 40,
+                imageUrl: 'https://images.unsplash.com/photo-1551537482-f2075a1d41f2?auto=format&fit=crop&w=500&q=60'
+            },
+
+            // Books
+            {
+                name: 'The Great Gatsby',
+                description: 'Classic novel by F. Scott Fitzgerald.',
+                price: 14.99,
+                category: 'Books',
+                stock: 60,
+                imageUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=500&q=60'
+            },
+            {
+                name: 'Atomic Habits',
+                description: 'Self-help book by James Clear.',
+                price: 24.99,
+                category: 'Books',
+                stock: 80,
+                imageUrl: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=500&q=60'
+            },
+
+            // Groceries
+            {
+                name: 'Organic Honey',
+                description: 'Pure, raw organic honey.',
+                price: 12.99,
+                category: 'Groceries',
+                stock: 50,
+                imageUrl: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=500&q=60'
+            },
+            {
+                name: 'Fresh Coffee Beans',
+                description: 'Arabica coffee beans, medium roast.',
+                price: 18.99,
+                category: 'Groceries',
+                stock: 40,
+                imageUrl: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=500&q=60'
+            },
+
+            // Furniture
+            {
+                name: 'Modern Sofa',
+                description: 'Comfortable 3-seater sofa with modern design.',
+                price: 499.99,
+                category: 'Furniture',
+                stock: 10,
+                imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=500&q=60'
+            },
+            {
+                name: 'Wooden Coffee Table',
+                description: 'Handcrafted oak wood coffee table.',
+                price: 149.99,
+                category: 'Furniture',
+                stock: 15,
+                imageUrl: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=500&q=60'
+            },
+
+            // Accessories
+            {
+                name: 'Leather Wallet',
+                description: 'Genuine leather wallet with multiple card slots.',
+                price: 39.99,
+                category: 'Accessories',
+                stock: 70,
+                imageUrl: 'https://images.unsplash.com/photo-1627123424574-181ce5171c98?auto=format&fit=crop&w=500&q=60'
+            },
+            {
+                name: 'Sunglasses',
+                description: 'UV protection sunglasses with stylish frame.',
+                price: 29.99,
+                category: 'Accessories',
+                stock: 60,
+                imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=500&q=60'
             }
         ];
 
-        await Project.bulkCreate(projects);
-        console.log('Projects seeded');
+        await Product.bulkCreate(products);
+        console.log('Products seeded');
 
         process.exit();
     } catch (error) {

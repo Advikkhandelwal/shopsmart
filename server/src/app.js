@@ -4,7 +4,7 @@ const passport = require('passport');
 require('./config/passport'); // Passport config
 
 const authRoutes = require('./routes/authRoutes');
-const projectRoutes = require('./routes/projectRoutes');
+const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 
@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(passport.initialize());
 
 app.use('/auth', authRoutes);
-app.use('/api/projects', projectRoutes);
+app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 

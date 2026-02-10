@@ -1,26 +1,26 @@
 const sequelize = require('../config/database');
 const User = require('./User');
-const Project = require('./Project');
+const Product = require('./Product');
 const Order = require('./Order');
 const OrderItem = require('./OrderItem');
 const Cart = require('./Cart');
 
-// User <-> Project (Cart)
-User.belongsToMany(Project, { through: Cart, as: 'cartItems', foreignKey: 'userId' });
-Project.belongsToMany(User, { through: Cart, as: 'inCarts', foreignKey: 'projectId' });
+// User <-> Product (Cart)
+User.belongsToMany(Product, { through: Cart, as: 'cartItems', foreignKey: 'userId' });
+Product.belongsToMany(User, { through: Cart, as: 'inCarts', foreignKey: 'productId' });
 
 // User <-> Order
 User.hasMany(Order, { foreignKey: 'userId' });
 Order.belongsTo(User, { foreignKey: 'userId' });
 
-// Order <-> Project (OrderItem)
-Order.belongsToMany(Project, { through: OrderItem, foreignKey: 'orderId' });
-Project.belongsToMany(Order, { through: OrderItem, foreignKey: 'projectId' });
+// Order <-> Product (OrderItem)
+Order.belongsToMany(Product, { through: OrderItem, foreignKey: 'orderId' });
+Product.belongsToMany(Order, { through: OrderItem, foreignKey: 'productId' });
 
 module.exports = {
     sequelize,
     User,
-    Project,
+    Product,
     Order,
     OrderItem,
     Cart,
