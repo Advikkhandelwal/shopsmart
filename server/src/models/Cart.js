@@ -12,8 +12,13 @@ const Cart = sequelize.define('Cart', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    projectId: {
+    productId: {
         type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    quantity: {
+        type: DataTypes.INTEGER,
+        defaultValue: 1,
         allowNull: false,
     },
 }, {

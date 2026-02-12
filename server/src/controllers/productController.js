@@ -1,11 +1,49 @@
+const { Op } = require('sequelize');
 const { Product } = require('../models');
 
-// @desc    Get all products
-// @route   GET /api/products
+// @desc    Get distinct categories
+// @route   GET /products/categories
+// @access  Public
+exports.getCategories = async (req, res) => {
+    try {
+        const products = await Product.findAll({
+            attributes: ['category'],
+            where: { category: { [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: '' }] } },
+            raw: true,
+        });
+        const set = new Set(products.map((p) => p.category).filter(Boolean));
+        res.json([...set].sort());
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get all products (with search, filter)
+// @route   GET /products
 // @access  Public
 exports.getProducts = async (req, res) => {
     try {
-        const products = await Product.findAll();
+        const { search, category, minPrice, maxPrice } = req.query;
+        const where = {};
+
+        if (search && search.trim()) {
+            where[Op.or] = [
+                { name: { [Op.like]: `%${search.trim()}%` } },
+                { description: { [Op.like]: `%${search.trim()}%` } },
+            ];
+        }
+        if (category && category.trim()) {
+            where.category = category.trim();
+        }
+        const min = minPrice != null && !isNaN(Number(minPrice)) ? Number(minPrice) : null;
+        const max = maxPrice != null && !isNaN(Number(maxPrice)) ? Number(maxPrice) : null;
+        if (min != null || max != null) {
+            where.price = {};
+            if (min != null) where.price[Op.gte] = min;
+            if (max != null) where.price[Op.lte] = max;
+        }
+
+        const products = await Product.findAll({ where });
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });

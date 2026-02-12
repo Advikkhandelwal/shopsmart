@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { sequelize, User, Product } = require('./models/index');
 
 const seedData = async () => {
@@ -5,22 +6,25 @@ const seedData = async () => {
         await sequelize.sync({ force: true });
         console.log('Database synced');
 
-        // Create Users
+        const hashedPassword = await bcrypt.hash('admin123', 10);
         await User.create({
             name: 'Admin User',
             email: 'admin@example.com',
+            password: hashedPassword,
             isAdmin: true,
-            googleId: 'google_id_admin_123'
+            googleId: 'google_id_admin_123',
         });
 
+        const userPassword = await bcrypt.hash('user123', 10);
         await User.create({
             name: 'John Doe',
             email: 'john@example.com',
+            password: userPassword,
             isAdmin: false,
-            googleId: 'google_id_john_456'
+            googleId: 'google_id_john_456',
         });
 
-        console.log('Users seeded');
+        console.log('Users seeded (admin@example.com / admin123, john@example.com / user123)');
 
         // Create Products
         const products = [

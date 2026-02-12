@@ -24,12 +24,14 @@ const User = sequelize.define('User', {
       isEmail: true,
     },
   },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: true, // null for Google-only users
+  },
   isAdmin: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
-  // Password is not needed for Google Auth-only, but kept if we mix auth methods later.
-  // For now, we rely on googleId.
 }, {
   timestamps: true,
 });

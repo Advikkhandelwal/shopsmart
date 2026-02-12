@@ -21,11 +21,26 @@ const Order = sequelize.define('Order', {
         defaultValue: false,
     },
     paidAt: {
-        type: DataTypes.DATE, // Sequelize stores as DATETIME in SQLite
+        type: DataTypes.DATE,
     },
     paymentResult: {
-        type: DataTypes.JSON, // Store Stripe payment details
+        type: DataTypes.JSON,
         allowNull: true,
+    },
+    status: {
+        type: DataTypes.STRING,
+        defaultValue: 'pending', // pending | paid | shipped | delivered | cancelled
+    },
+    shippingAddress: {
+        type: DataTypes.JSON,
+        allowNull: true, // { address, city, postalCode, country }
+    },
+    isDelivered: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    deliveredAt: {
+        type: DataTypes.DATE,
     },
 }, {
     timestamps: true,
