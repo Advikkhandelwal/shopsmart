@@ -18,9 +18,8 @@ router.get('/google/callback',
         });
 
         // Redirect to frontend with token
-        // In production, might want to send this differently (cookie, or redirect param)
-        // For now assuming localhost frontend
-        res.redirect(`http://localhost:5173/login?token=${token}`);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/login?token=${token}`);
     }
 );
 
