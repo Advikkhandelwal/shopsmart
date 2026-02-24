@@ -10,6 +10,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     },
         async (accessToken, refreshToken, profile, done) => {
             try {
+                console.log('Google Profile:', profile);
                 const email = profile.emails[0].value;
                 const googleId = profile.id;
 
@@ -17,6 +18,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                 let user = await User.findOne({ where: { googleId } });
 
                 if (user) {
+                    console.log('User found by googleId:', user.id);
                     return done(null, user);
                 }
 
@@ -24,6 +26,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                 user = await User.findOne({ where: { email } });
 
                 if (user) {
+                    console.log('User found by email, linking Google account:', user.id);
                     // Link account
                     user.googleId = googleId;
                     await user.save();
@@ -31,6 +34,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                 }
 
                 // 3. If not found, create new user
+                console.log('Creating new user for:', email);
                 user = await User.create({
                     googleId,
                     name: profile.displayName,
@@ -40,11 +44,13 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
                 done(null, user);
             } catch (err) {
-                console.error('Passport Google Strategy Error:', err);
+                console.error('Passport Google Strategy Error details:', err);
                 done(err, null);
             }
         }
     ));
+} else {
+    console.error('Google Auth Strategy NOT initialized. Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET.');
 }
 
 // Serialize/Deserialize not strictly needed if using manual JWT generation in routes,

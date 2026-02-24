@@ -2,9 +2,10 @@
 function errorHandler(err, req, res, next) {
     const status = err.statusCode || err.status || 500;
     const message = err.message || 'Internal server error';
-    if (status === 500) {
-        console.error(err);
-    }
+
+    // Log all errors for debugging
+    console.error(`Status ${status} Error:`, err);
+
     res.status(status).json({
         success: false,
         message,
