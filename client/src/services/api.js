@@ -1,3 +1,5 @@
+// Prefer proxy in dev (vite.config.js proxies /products, /users, etc.)
+// and keep env override for deployments.
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 const getToken = () => localStorage.getItem('token');
@@ -17,10 +19,16 @@ export const apiCall = async (endpoint, options = {}) => {
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
-        ...options,
-        headers,
-    });
+    let response;
+    try {
+        response = await fetch(`${API_URL}${endpoint}`, {
+            ...options,
+            headers,
+        });
+    } catch (err) {
+        // Network/proxy/backend down, or CORS-blocked fetch
+        throw new Error('Network error: unable to reach backend API');
+    }
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {

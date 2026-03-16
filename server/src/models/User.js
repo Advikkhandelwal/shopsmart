@@ -24,9 +24,58 @@ const User = sequelize.define('User', {
       isEmail: true,
     },
   },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true,
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: true, // null for Google-only users
+  },
+  isEmailVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  isPhoneVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  emailVerificationTokenHash: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  emailVerificationExpiresAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  passwordResetTokenHash: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  passwordResetExpiresAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  phoneOtpHash: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  phoneOtpExpiresAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
+  marketingConsent: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  preferences: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
+  stripeCustomerId: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
   isAdmin: {
     type: DataTypes.BOOLEAN,

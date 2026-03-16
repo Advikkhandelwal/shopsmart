@@ -62,7 +62,7 @@ export default function App() {
       setProducts(data);
     } catch (error) {
       setProducts([]);
-      showMessage('Failed to load products', true);
+      showMessage(error?.message || 'Failed to load products', true);
     } finally {
       setLoading(false);
     }

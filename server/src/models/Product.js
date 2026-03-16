@@ -19,7 +19,16 @@ const Product = sequelize.define('Product', {
         type: DataTypes.TEXT,
     },
     category: {
+        // kept for backward compatibility with existing seed/UI
         type: DataTypes.STRING,
+    },
+    categoryId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
+    collectionId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
     },
     stock: {
         type: DataTypes.INTEGER,
