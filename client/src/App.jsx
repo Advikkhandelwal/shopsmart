@@ -28,6 +28,8 @@ export default function App() {
   const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   // OAuth callback
   useEffect(() => {
@@ -55,18 +57,26 @@ export default function App() {
     loadProfile();
   }, [loadProfile]);
 
-  const loadProducts = useCallback(async () => {
+  const loadProducts = useCallback(async (overridePage) => {
+    const nextPage = overridePage || page;
     setLoading(true);
     try {
-      const data = await productsService.getAll({ search, category });
-      setProducts(data);
+      const data = await productsService.getAll({ search, category, page: nextPage });
+      if (Array.isArray(data)) {
+        setProducts(data);
+        setTotalPages(1);
+      } else {
+        setProducts(data.items || []);
+        setPage(data.page || nextPage);
+        setTotalPages(data.totalPages || 1);
+      }
     } catch (error) {
       setProducts([]);
       showMessage(error?.message || 'Failed to load products', true);
     } finally {
       setLoading(false);
     }
-  }, [search, category]);
+  }, [search, category, page]);
 
   useEffect(() => {
     productsService.getCategories().then(setCategories).catch(() => setCategories([]));
@@ -238,6 +248,12 @@ export default function App() {
             loading={loading}
             onProductClick={openProduct}
             onAddToCart={addToCart}
+            page={page}
+            totalPages={totalPages}
+            onPageChange={(p) => {
+              setPage(p);
+              loadProducts(p);
+            }}
           />
         )}
 

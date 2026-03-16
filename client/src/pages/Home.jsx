@@ -1,7 +1,7 @@
 import React from 'react';
 import ProductCard from '../components/ProductCard';
 
-const Home = ({ products, loading, onProductClick, onAddToCart }) => {
+const Home = ({ products, loading, onProductClick, onAddToCart, page = 1, totalPages = 1, onPageChange }) => {
     if (loading) {
         return (
             <div className="container" style={{ padding: '40px 0' }}>
@@ -28,6 +28,25 @@ const Home = ({ products, loading, onProductClick, onAddToCart }) => {
                         ))
                     )}
                 </div>
+                {totalPages > 1 && (
+                    <div className="pagination" style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                        <button
+                            disabled={page <= 1}
+                            onClick={() => onPageChange && onPageChange(page - 1)}
+                        >
+                            ‹ Prev
+                        </button>
+                        <span>
+                            Page {page} of {totalPages}
+                        </span>
+                        <button
+                            disabled={page >= totalPages}
+                            onClick={() => onPageChange && onPageChange(page + 1)}
+                        >
+                            Next ›
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

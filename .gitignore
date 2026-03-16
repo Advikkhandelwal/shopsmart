@@ -5,3 +5,9 @@ dist
 build
 coverage
 .vercel
+
+# datasets / local artifacts
+server/data/
+*.csv
+*.zip
+*.sqlite

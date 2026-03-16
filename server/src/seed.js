@@ -135,7 +135,11 @@ const seedData = async () => {
     console.log('Users seeded (admin@example.com / admin123, john@example.com / user123)');
 
     // Prefer Kaggle CSV if present
-    const kaggleProducts = await loadProductsFromKaggleCsv(500);
+    const kaggleLimitRaw = process.env.SEED_KAGGLE_LIMIT;
+    const kaggleLimit = kaggleLimitRaw != null ? Number(kaggleLimitRaw) : 500;
+    const kaggleProducts = await loadProductsFromKaggleCsv(
+      Number.isFinite(kaggleLimit) && kaggleLimit > 0 ? kaggleLimit : 500
+    );
     if (kaggleProducts.length > 0) {
       await Product.bulkCreate(kaggleProducts);
       console.log(`Products seeded from Kaggle CSV (${kaggleProducts.length} items).`);

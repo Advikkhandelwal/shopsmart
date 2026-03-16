@@ -18,12 +18,12 @@ exports.getCategories = async (req, res) => {
     }
 };
 
-// @desc    Get all products (with search, filter)
+// @desc    Get all products (with search, filter, pagination)
 // @route   GET /products
 // @access  Public
 exports.getProducts = async (req, res) => {
     try {
-        const { search, category, minPrice, maxPrice } = req.query;
+        const { search, category, minPrice, maxPrice, page = 1, pageSize = 20 } = req.query;
         const where = {};
 
         if (search && search.trim()) {
@@ -43,8 +43,24 @@ exports.getProducts = async (req, res) => {
             if (max != null) where.price[Op.lte] = max;
         }
 
-        const products = await Product.findAll({ where });
-        res.json(products);
+        const safePageSize = Math.max(1, Math.min(100, Number(pageSize) || 20));
+        const safePage = Math.max(1, Number(page) || 1);
+        const offset = (safePage - 1) * safePageSize;
+
+        const { rows, count } = await Product.findAndCountAll({
+            where,
+            limit: safePageSize,
+            offset,
+            order: [['id', 'ASC']],
+        });
+
+        res.json({
+            items: rows,
+            page: safePage,
+            pageSize: safePageSize,
+            totalItems: count,
+            totalPages: Math.max(1, Math.ceil(count / safePageSize)),
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
