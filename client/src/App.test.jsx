@@ -12,7 +12,7 @@ describe('App', () => {
         );
 
         render(<App />);
-        const linkElement = screen.getByText(/ShopSmart/i);
+        const linkElement = screen.getByRole('link', { name: /ShopSmart/i });
         expect(linkElement).toBeInTheDocument();
     });
 });

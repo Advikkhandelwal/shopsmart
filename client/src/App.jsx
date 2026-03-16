@@ -57,11 +57,19 @@ export default function App() {
     loadProfile();
   }, [loadProfile]);
 
-  const loadProducts = useCallback(async (overridePage) => {
-    const nextPage = overridePage || page;
+  const loadProducts = useCallback(async (opts = {}) => {
+    const nextPage = opts.page || page;
+    const nextSearch = opts.search ?? search;
+    const nextCategory = opts.category ?? category;
+    const nextPageSize = opts.pageSize;
     setLoading(true);
     try {
-      const data = await productsService.getAll({ search, category, page: nextPage });
+      const data = await productsService.getAll({
+        search: nextSearch,
+        category: nextCategory,
+        page: nextPage,
+        ...(nextPageSize ? { pageSize: nextPageSize } : {}),
+      });
       if (Array.isArray(data)) {
         setProducts(data);
         setTotalPages(1);
@@ -83,8 +91,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (view === 'home') loadProducts();
-  }, [view, loadProducts]);
+    if (view !== 'home') return;
+    const sectionsMode = !search && !category;
+    loadProducts({ page: 1, pageSize: sectionsMode ? 80 : 20 });
+  }, [view, loadProducts, search, category]);
 
   const loadCart = useCallback(async () => {
     try {
@@ -250,9 +260,16 @@ export default function App() {
             onAddToCart={addToCart}
             page={page}
             totalPages={totalPages}
+            showSections={!search && !category}
+            categories={categories}
+            onSelectCategory={(cat) => {
+              setSearch('');
+              setCategory(cat);
+              setPage(1);
+            }}
             onPageChange={(p) => {
               setPage(p);
-              loadProducts(p);
+              loadProducts({ page: p });
             }}
           />
         )}
@@ -282,6 +299,7 @@ export default function App() {
             cart={cart}
             onPlaceOrder={placeOrder}
             loading={loading}
+            onBack={() => setView('home')}
           />
         )}
 

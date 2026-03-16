@@ -1,11 +1,22 @@
 import React from 'react';
 
-const Checkout = ({ onPlaceOrder, loading, cart }) => {
+const Checkout = ({ onPlaceOrder, loading, cart, onBack }) => {
     const total = cart.reduce((sum, item) => sum + (item.quantity * (item.product?.price || 0)), 0);
 
     return (
         <div className="container mt-2">
-            <h1 className="page-title">Checkout</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h1 className="page-title">Checkout</h1>
+                {onBack && (
+                    <button
+                        type="button"
+                        onClick={onBack}
+                        style={{ fontSize: '0.9rem', color: 'var(--accent)' }}
+                    >
+                        ‹ Back to Home
+                    </button>
+                )}
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '30px' }}>
                 <div style={{ background: 'white', padding: '30px', borderRadius: '4px' }}>
                     <h2 style={{ marginBottom: '20px' }}>Shipping Address</h2>
