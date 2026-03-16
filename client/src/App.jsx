@@ -14,7 +14,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Checkout from './pages/Checkout';
 
-const API_URL = ''; // Same as in api.js
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 export default function App() {
   const [view, setView] = useState('home');
@@ -182,7 +182,21 @@ export default function App() {
     const address = e.target?.shippingAddress?.value || '';
     setLoading(true);
     try {
-      await orderService.place(address);
+      // Create order from cart
+      const order = await orderService.place(address);
+
+      // Try to start Stripe Checkout if configured
+      try {
+        const session = await orderService.checkout(order.id);
+        if (session?.url) {
+          window.location.href = session.url;
+          return;
+        }
+      } catch (err) {
+        // If Stripe is not configured or fails, fall back to marking order as placed
+        // and just show the local orders list.
+      }
+
       setCart([]);
       showMessage('Order placed successfully');
       setView('orders');
@@ -206,6 +220,7 @@ export default function App() {
         setSearch={setSearch}
         onSearch={loadProducts}
         categories={categories}
+        setCategory={setCategory}
       />
 
       <main className="main" style={{ flex: 1, padding: 0, maxWidth: 'none' }}>
@@ -268,6 +283,7 @@ export default function App() {
             onRegister={handleRegister}
             setView={setView}
             loading={loading}
+            API_URL={API_URL}
           />
         )}
 

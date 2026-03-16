@@ -5,7 +5,15 @@ const router = express.Router();
 
 // @desc    Auth with Google
 // @route   GET /auth/google
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// `prompt: 'select_account'` ensures the Google UI offers account selection
+// rather than forcing users to manually type their email/password again.
+router.get(
+  '/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    prompt: 'select_account',
+  })
+);
 
 // @desc    Google auth callback
 // @route   GET /auth/google/callback

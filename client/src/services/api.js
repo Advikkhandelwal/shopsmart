@@ -1,4 +1,4 @@
-const API_URL = ''; // Can be set to a specific URL if needed, e.g., 'http://localhost:5000'
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const getToken = () => localStorage.getItem('token');
 export const setToken = (token) => {
@@ -69,5 +69,8 @@ export const orderService = {
     place: (shippingAddress) => apiCall('/orders', {
         method: 'POST',
         body: JSON.stringify({ shippingAddress }),
+    }),
+    checkout: (orderId) => apiCall(`/orders/${orderId}/checkout`, {
+        method: 'POST',
     }),
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearch, categories }) => {
+const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearch, categories, setCategory }) => {
     return (
         <header className="header">
             <div className="container">
@@ -24,7 +24,7 @@ const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearc
                     </div>
 
                     <div className="header-nav">
-                        <div className="nav-item" onClick={() => setView(user ? 'profile' : 'login')}>
+                        <div className="nav-item" onClick={() => setView(user ? 'orders' : 'login')}>
                             <span className="nav-line-1">Hello, {user ? user.name : 'sign in'}</span>
                             <span className="nav-line-2">Account & Lists</span>
                         </div>
@@ -51,9 +51,30 @@ const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearc
 
             <div className="category-bar">
                 <div className="container" style={{ display: 'flex', gap: '20px' }}>
-                    <span style={{ fontWeight: 700, cursor: 'pointer' }} onClick={() => setView('home')}>All</span>
-                    {categories.slice(0, 8).map(cat => (
-                        <span key={cat} style={{ cursor: 'pointer' }} onClick={() => { setSearch(''); setView('home'); /* Logic to filter category would go here or state passing */ }}>{cat}</span>
+                    <span
+                        style={{ fontWeight: 700, cursor: 'pointer' }}
+                        onClick={() => {
+                            setCategory('');
+                            setSearch('');
+                            setView('home');
+                            onSearch();
+                        }}
+                    >
+                        All
+                    </span>
+                    {categories.slice(0, 8).map((cat) => (
+                        <span
+                            key={cat}
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => {
+                                setCategory(cat);
+                                setSearch('');
+                                setView('home');
+                                onSearch();
+                            }}
+                        >
+                            {cat}
+                        </span>
                     ))}
                 </div>
             </div>
