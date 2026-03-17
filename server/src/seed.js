@@ -4,6 +4,7 @@ const { sequelize, User, Product } = require('./models/index');
 const fs = require('fs');
 const path = require('path');
 const { parse } = require('csv-parse/sync');
+const { execSync } = require('child_process');
 
 const fallbackProducts = [
   {
@@ -53,7 +54,9 @@ const fallbackProducts = [
   },
 ];
 
-const kaggleCsvPath = path.join(__dirname, '../data/kaggle/flipkart_com-ecommerce_sample.csv');
+const kaggleCsvDir = path.join(__dirname, '../data/kaggle');
+const kaggleCsvPath = path.join(kaggleCsvDir, 'flipkart_com-ecommerce_sample.csv');
+const archiveZipPath = path.join(__dirname, '../../../archive.zip');
 
 function safeNumber(v) {
   const n = Number(v);
@@ -84,25 +87,62 @@ function categoryFromTree(treeField) {
   return first || null;
 }
 
-async function loadProductsFromKaggleCsv(limit = 500) {
-  if (!fs.existsSync(kaggleCsvPath)) return [];
+function ensureKaggleData() {
+  if (fs.existsSync(kaggleCsvPath)) return true;
+
+  console.log('Kaggle CSV not found. Looking for archive.zip...');
+  if (!fs.existsSync(archiveZipPath)) {
+    console.warn(`archive.zip not found at ${archiveZipPath}. Skipping Kaggle seed.`);
+    return false;
+  }
+
+  try {
+    console.log(`Unzipping ${archiveZipPath} to ${kaggleCsvDir}...`);
+    if (!fs.existsSync(kaggleCsvDir)) {
+      fs.mkdirSync(kaggleCsvDir, { recursive: true });
+    }
+    execSync(`unzip -o "${archiveZipPath}" -d "${kaggleCsvDir}"`);
+    console.log('Unzip successful.');
+    return fs.existsSync(kaggleCsvPath);
+  } catch (error) {
+    console.error('Failed to unzip archive.zip:', error.message);
+    return false;
+  }
+}
+
+async function loadProductsFromKaggleCsv(limit = 1000) {
+  if (!ensureKaggleData()) return [];
   const csv = fs.readFileSync(kaggleCsvPath, 'utf8');
   const records = parse(csv, { columns: true, skip_empty_lines: true });
   const mapped = [];
+  const uniqueNames = new Set();
+
   for (const r of records) {
     const name = (r.product_name || '').trim();
     if (!name) continue;
+
     const price =
       safeNumber(r.discounted_price) ??
       safeNumber(r.retail_price) ??
       0;
+    
+    const imageUrl = parseImageUrl(r.image);
+
+    // Stricter filtering for better quality data
+    if (price <= 0 || !imageUrl) continue;
+
+    // Strict deduplication by name
+    const nameKey = name.toLowerCase();
+    if (uniqueNames.has(nameKey)) continue;
+    uniqueNames.add(nameKey);
+
     mapped.push({
       name,
       description: (r.description || '').slice(0, 4000) || null,
       price,
-      category: categoryFromTree(r.product_category_tree) || (r.brand ? String(r.brand) : null),
-      stock: 50, // dataset doesn't include stock; use a reasonable default
-      imageUrl: parseImageUrl(r.image),
+      category: categoryFromTree(r.product_category_tree) || (r.brand ? String(r.brand) : 'General'),
+      stock: Math.floor(Math.random() * 100) + 10,
+      imageUrl,
     });
     if (mapped.length >= limit) break;
   }
@@ -136,12 +176,18 @@ const seedData = async () => {
 
     // Prefer Kaggle CSV if present
     const kaggleLimitRaw = process.env.SEED_KAGGLE_LIMIT;
-    const kaggleLimit = kaggleLimitRaw != null ? Number(kaggleLimitRaw) : 500;
+    const kaggleLimit = kaggleLimitRaw != null ? Number(kaggleLimitRaw) : 1000;
+    console.log(`Loading up to ${kaggleLimit} products from Kaggle dataset...`);
     const kaggleProducts = await loadProductsFromKaggleCsv(
-      Number.isFinite(kaggleLimit) && kaggleLimit > 0 ? kaggleLimit : 500
+      Number.isFinite(kaggleLimit) && kaggleLimit > 0 ? kaggleLimit : 1000
     );
     if (kaggleProducts.length > 0) {
-      await Product.bulkCreate(kaggleProducts);
+      // Use chunks to avoid SQLite limits if the limit is very high
+      const chunkSize = 100;
+      for (let i = 0; i < kaggleProducts.length; i += chunkSize) {
+        const chunk = kaggleProducts.slice(i, i + chunkSize);
+        await Product.bulkCreate(chunk);
+      }
       console.log(`Products seeded from Kaggle CSV (${kaggleProducts.length} items).`);
       process.exit();
     }

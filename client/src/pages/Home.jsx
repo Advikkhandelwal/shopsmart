@@ -18,7 +18,11 @@ const Home = ({
     if (loading) {
         return (
             <div className="container" style={{ padding: '40px 0' }}>
-                <p>Loading the latest deals...</p>
+                <div className="category-sections-grid">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="category-section loading-pulse" style={{ height: '300px' }}></div>
+                    ))}
+                </div>
             </div>
         );
     }
@@ -37,13 +41,23 @@ const Home = ({
 
     return (
         <div>
-            <div className="hero"></div>
+            <div className="hero">
+                <div className="container">
+                    <h1 style={{ color: 'white', fontSize: '3.5rem', fontFamily: 'Playfair Display, serif', maxWidth: '600px', lineHeight: '1.1' }}>
+                        Elevate Your Lifestyle with <span style={{ color: 'var(--primary)' }}>ShopSmart</span>
+                    </h1>
+                    <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.2rem', marginTop: '20px', maxWidth: '500px' }}>
+                        Discover a curated collection of premium products delivered right to your doorstep.
+                    </p>
+                </div>
+            </div>
             <div className="container products-container">
                 {showSections ? (
                     <div className="category-sections-grid">
-                        {pick(sectionCategories, 8).map((cat) => {
+                        {pick(sectionCategories, 12).map((cat) => {
                             const items = byCategory[cat] || [];
                             const preview = pick(items, 4);
+                            if (preview.length === 0) return null;
                             return (
                                 <div key={cat} className="category-section">
                                     <div className="category-section-header">
@@ -52,14 +66,11 @@ const Home = ({
                                             className="category-section-more"
                                             onClick={() => onSelectCategory && onSelectCategory(cat)}
                                         >
-                                            See more
+                                            View All
                                         </button>
                                     </div>
                                     <div className="category-section-items">
-                                        {preview.length === 0 ? (
-                                            <p className="text-muted">No items</p>
-                                        ) : (
-                                            preview.map((p) => (
+                                        {preview.map((p) => (
                                                 <button
                                                     key={p.id}
                                                     className="category-section-item"
@@ -72,7 +83,7 @@ const Home = ({
                                                     <span title={p.name}>{p.name}</span>
                                                 </button>
                                             ))
-                                        )}
+                                        }
                                     </div>
                                 </div>
                             );
@@ -82,7 +93,10 @@ const Home = ({
                     <>
                         <div className="products-grid">
                             {products.length === 0 ? (
-                                <p className="text-muted">No products found. Try a different search.</p>
+                                <div style={{ textAlign: 'center', padding: '40px', gridColumn: '1/-1' }}>
+                                    <h3 className="text-muted">No products found matching your search.</h3>
+                                    <button onClick={() => onSelectCategory('')} className="btn-add-cart" style={{ maxWidth: '200px', marginTop: '20px' }}>Browse All Products</button>
+                                </div>
                             ) : (
                                 products.map((p) => (
                                     <ProductCard
@@ -95,21 +109,25 @@ const Home = ({
                             )}
                         </div>
                         {totalPages > 1 && (
-                            <div className="pagination" style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                            <div className="pagination" style={{ marginTop: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
                                 <button
+                                    className="btn-add-cart"
+                                    style={{ width: 'auto', padding: '8px 20px', background: page <= 1 ? '#e2e8f0' : 'var(--primary)' }}
                                     disabled={page <= 1}
                                     onClick={() => onPageChange && onPageChange(page - 1)}
                                 >
-                                    ‹ Prev
+                                    Previous
                                 </button>
-                                <span>
-                                    Page {page} of {totalPages}
+                                <span style={{ fontWeight: 600 }}>
+                                    {page} of {totalPages}
                                 </span>
                                 <button
+                                    className="btn-add-cart"
+                                    style={{ width: 'auto', padding: '8px 20px', background: page >= totalPages ? '#e2e8f0' : 'var(--primary)' }}
                                     disabled={page >= totalPages}
                                     onClick={() => onPageChange && onPageChange(page + 1)}
                                 >
-                                    Next ›
+                                    Next
                                 </button>
                             </div>
                         )}

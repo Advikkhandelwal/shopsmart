@@ -1,11 +1,15 @@
 import React from 'react';
 
-const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearch, categories, setCategory }) => {
+const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearch, categories, onNavigate }) => {
     return (
         <header className="header">
             <div className="container">
                 <div className="header-top">
-                    <a href="#" className="logo" onClick={(e) => { e.preventDefault(); setView('home'); }}>
+                    <a href="/" className="logo" onClick={(e) => { 
+                        e.preventDefault(); 
+                        setView('home'); 
+                        onNavigate({ search: '', category: '', page: 1 });
+                    }}>
                         ShopSmart
                     </a>
 
@@ -16,9 +20,9 @@ const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearc
                             placeholder="Search products..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && onSearch()}
+                            onKeyDown={(e) => e.key === 'Enter' && onNavigate({ search })}
                         />
-                        <button className="search-btn" onClick={onSearch}>
+                        <button className="search-btn" onClick={() => onNavigate({ search })}>
                             🔍
                         </button>
                     </div>
@@ -54,23 +58,19 @@ const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearc
                     <span
                         style={{ fontWeight: 700, cursor: 'pointer' }}
                         onClick={() => {
-                            setCategory('');
-                            setSearch('');
                             setView('home');
-                            onSearch();
+                            onNavigate({ category: '', search: '', page: 1 });
                         }}
                     >
                         All
                     </span>
-                    {categories.slice(0, 8).map((cat) => (
+                    {categories.slice(0, 12).map((cat) => (
                         <span
                             key={cat}
                             style={{ cursor: 'pointer' }}
                             onClick={() => {
-                                setCategory(cat);
-                                setSearch('');
                                 setView('home');
-                                onSearch();
+                                onNavigate({ category: cat, search: '', page: 1 });
                             }}
                         >
                             {cat}

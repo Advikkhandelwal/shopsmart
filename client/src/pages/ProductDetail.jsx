@@ -1,54 +1,72 @@
 import React from 'react';
 
 const ProductDetail = ({ product, loading, onAddToCart, onBack }) => {
-    if (loading) return <div className="container mt-2">Loading product details...</div>;
-    if (!product) return <div className="container mt-2">Product not found. <button onClick={onBack}>Go Back</button></div>;
+    if (loading) return (
+        <div className="container" style={{ padding: '60px 0' }}>
+            <div className="loading-pulse" style={{ height: '400px', borderRadius: '20px' }}></div>
+        </div>
+    );
+
+    if (!product) return (
+        <div className="container" style={{ padding: '60px 0', textAlign: 'center' }}>
+            <h2>Product not found</h2>
+            <button className="btn-add-cart" style={{ maxWidth: '200px', marginTop: '20px' }} onClick={onBack}>Go Back Home</button>
+        </div>
+    );
 
     return (
-        <div className="container mt-2">
-            <button className="btn btn-ghost btn-sm mb-1" onClick={onBack}>
+        <div className="container">
+            <button 
+                onClick={onBack}
+                style={{ marginTop: '20px', color: 'var(--accent)', fontWeight: 600 }}
+            >
                 ← Back to results
             </button>
 
-            <div className="product-detail">
-                <div className="product-image-wrapper" style={{ height: 'auto', maxHeight: '500px' }}>
+            <div className="product-detail-container">
+                <div className="detail-image-box">
                     <img
                         src={product.imageUrl || 'https://placehold.co/600?text=No+image'}
                         alt={product.name}
-                        className="product-image"
+                        style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
                     />
                 </div>
 
-                <div className="product-info">
-                    <h1 className="page-title" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{product.name}</h1>
-                    <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Category: {product.category}</p>
+                <div className="detail-info">
+                    <div>
+                        <p style={{ color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px' }}>
+                            {product.category}
+                        </p>
+                        <h1 className="detail-title">{product.name}</h1>
+                    </div>
 
-                    <hr style={{ border: '0', borderTop: '1px solid var(--border-light)', margin: '20px 0' }} />
-
-                    <div className="product-price" style={{ fontSize: '1.8rem' }}>
-                        <span style={{ fontSize: '1rem', verticalAlign: 'top' }}>$</span>
+                    <div className="detail-price">
+                        <span style={{ fontSize: '1.2rem', verticalAlign: 'top', marginRight: '2px' }}>$</span>
                         {Number(product.price).toFixed(2)}
                     </div>
 
-                    <div className="description mt-2" style={{ color: 'var(--text-main)', fontSize: '1rem' }}>
-                        <h4>About this item</h4>
-                        <p>{product.description || 'No description available for this item.'}</p>
+                    <div className="detail-desc">
+                        <h4 style={{ color: 'var(--text-main)', marginBottom: '12px' }}>Description</h4>
+                        <p>{product.description || 'No detailed description available for this premium item.'}</p>
                     </div>
 
-                    <div className="purchase-actions mt-2" style={{ maxWidth: '300px' }}>
+                    <div style={{ marginTop: '20px' }}>
                         {product.stock > 0 ? (
                             <>
-                                <p style={{ color: 'var(--success)', fontWeight: 700, marginBottom: '10px' }}>In Stock</p>
+                                <p style={{ color: '#10b981', fontWeight: 700, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }}></span>
+                                    In Stock & Ready to Ship
+                                </p>
                                 <button
                                     className="btn-add-cart"
-                                    style={{ width: '100%', padding: '12px' }}
+                                    style={{ maxWidth: '400px', padding: '16px', fontSize: '1.1rem' }}
                                     onClick={() => onAddToCart(product.id)}
                                 >
                                     Add to Cart
                                 </button>
                             </>
                         ) : (
-                            <p style={{ color: 'var(--error)', fontWeight: 700 }}>Currently Unavailable</p>
+                            <p style={{ color: '#ef4444', fontWeight: 700 }}>Currently Out of Stock</p>
                         )}
                     </div>
                 </div>

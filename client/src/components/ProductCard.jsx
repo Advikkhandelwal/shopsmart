@@ -12,7 +12,7 @@ const ProductCard = ({ product, onClick, onAddToCart }) => {
             </div>
             <h3 className="product-title">{product.name}</h3>
             <div className="product-price">
-                <small>$</small>{Number(product.price).toFixed(2)}
+                {Number(product.price).toFixed(2)}
             </div>
             <button
                 className="btn-add-cart"

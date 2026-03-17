@@ -24,12 +24,95 @@ export default function App() {
   const [product, setProduct] = useState(null);
   const [cart, setCart] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
+
+  // Initialize filters from URL
+  const initialParams = new URLSearchParams(window.location.search);
+  const [search, setSearch] = useState(initialParams.get('search') || '');
+  const [category, setCategory] = useState(initialParams.get('category') || '');
+  const [page, setPage] = useState(Number(initialParams.get('page')) || 1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  // Sync URL with state helper (uses pushState for navigation history)
+  const navigateTo = useCallback((params) => {
+    const newParams = new URLSearchParams(window.location.search);
+    if (params.search !== undefined) {
+      if (params.search) newParams.set('search', params.search);
+      else newParams.delete('search');
+    }
+    if (params.category !== undefined) {
+      if (params.category) newParams.set('category', params.category);
+      else newParams.delete('category');
+    }
+    if (params.page !== undefined) {
+      if (params.page > 1) newParams.set('page', params.page);
+      else newParams.delete('page');
+    }
+    
+    // Always reset page to 1 if search or category changes, unless explicit
+    if ((params.search !== undefined || params.category !== undefined) && params.page === undefined) {
+      newParams.delete('page');
+    }
+
+    const newQuery = newParams.toString();
+    const newRelativePathQuery = window.location.pathname + (newQuery ? '?' + newQuery : '');
+    window.history.pushState(null, '', newRelativePathQuery);
+    
+    // Dispatch popstate manually so the reactive listener picks it up immediately
+    window.dispatchEvent(new Event('popstate'));
+  }, []);
+
+  const loadProducts = useCallback(async (searchParams) => {
+    const s = searchParams.get('search') || '';
+    const c = searchParams.get('category') || '';
+    const p = Number(searchParams.get('page')) || 1;
+    const sectionsMode = !s && !c;
+    const pageSize = sectionsMode ? 80 : 20;
+
+    setLoading(true);
+    try {
+      const data = await productsService.getAll({
+        search: s,
+        category: c,
+        page: p,
+        pageSize: pageSize
+      });
+
+      if (Array.isArray(data)) {
+        setProducts(data);
+        setTotalPages(1);
+      } else {
+        setProducts(data.items || []);
+        setPage(data.page || p);
+        setTotalPages(data.totalPages || 1);
+      }
+      setSearch(s);
+      setCategory(c);
+      setPage(p);
+    } catch (error) {
+      setProducts([]);
+      showMessage(error?.message || 'Failed to load products', true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Reactive effect: Listen to URL changes and fetch
+  useEffect(() => {
+    const handlePopState = () => {
+      if (view === 'home') {
+        const params = new URLSearchParams(window.location.search);
+        loadProducts(params);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    // Initial load
+    handlePopState();
+    
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [view, loadProducts]);
 
   // OAuth callback
   useEffect(() => {
@@ -37,64 +120,20 @@ export default function App() {
     const token = params.get('token');
     if (token) {
       setToken(token);
-      window.history.replaceState({}, '', window.location.pathname);
+      const newParams = new URLSearchParams(window.location.search);
+      newParams.delete('token');
+      const cleanPath = window.location.pathname + (newParams.toString() ? '?' + newParams.toString() : '');
+      window.history.replaceState({}, '', cleanPath);
       setView('home');
       loadProfile();
     }
   }, []);
 
-  const loadProfile = useCallback(async () => {
-    try {
-      const userData = await authService.getProfile();
-      setUser(userData);
-    } catch (error) {
-      setToken(null);
-      setUser(null);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
-
-  const loadProducts = useCallback(async (opts = {}) => {
-    const nextPage = opts.page || page;
-    const nextSearch = opts.search ?? search;
-    const nextCategory = opts.category ?? category;
-    const nextPageSize = opts.pageSize;
-    setLoading(true);
-    try {
-      const data = await productsService.getAll({
-        search: nextSearch,
-        category: nextCategory,
-        page: nextPage,
-        ...(nextPageSize ? { pageSize: nextPageSize } : {}),
-      });
-      if (Array.isArray(data)) {
-        setProducts(data);
-        setTotalPages(1);
-      } else {
-        setProducts(data.items || []);
-        setPage(data.page || nextPage);
-        setTotalPages(data.totalPages || 1);
-      }
-    } catch (error) {
-      setProducts([]);
-      showMessage(error?.message || 'Failed to load products', true);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, category, page]);
-
   useEffect(() => {
     productsService.getCategories().then(setCategories).catch(() => setCategories([]));
   }, []);
 
-  useEffect(() => {
-    if (view !== 'home') return;
-    const sectionsMode = !search && !category;
-    loadProducts({ page: 1, pageSize: sectionsMode ? 80 : 20 });
-  }, [view, loadProducts, search, category]);
+  const cartCount = cart.reduce((n, i) => n + (i.quantity || 0), 0);
 
   const loadCart = useCallback(async () => {
     try {
@@ -227,8 +266,6 @@ export default function App() {
     }
   };
 
-  const cartCount = cart.reduce((n, i) => n + (i.quantity || 0), 0);
-
   return (
     <>
       <Navbar
@@ -238,9 +275,8 @@ export default function App() {
         setView={setView}
         search={search}
         setSearch={setSearch}
-        onSearch={loadProducts}
         categories={categories}
-        setCategory={setCategory}
+        onNavigate={navigateTo}
       />
 
       <main className="main" style={{ flex: 1, padding: 0, maxWidth: 'none' }}>
@@ -263,13 +299,10 @@ export default function App() {
             showSections={!search && !category}
             categories={categories}
             onSelectCategory={(cat) => {
-              setSearch('');
-              setCategory(cat);
-              setPage(1);
+              navigateTo({ category: cat, search: '', page: 1 });
             }}
             onPageChange={(p) => {
-              setPage(p);
-              loadProducts({ page: p });
+              navigateTo({ page: p });
             }}
           />
         )}
