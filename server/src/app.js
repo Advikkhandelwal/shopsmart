@@ -4,6 +4,8 @@ const cors = require('cors');
 const passport = require('passport');
 require('./config/passport');
 
+const reviewRoutes = require('./routes/reviewRoutes');
+const addressRoutes = require('./routes/addressRoutes');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
@@ -24,6 +26,15 @@ app.use('/users', userRoutes);
 app.use('/products', productRoutes);
 app.use('/cart', cartRoutes);
 app.use('/orders', orderRoutes);
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/products', productRoutes);
+app.use('/cart', cartRoutes);
+app.use('/orders', orderRoutes);
+
+// new
+app.use('/products/:id/reviews', reviewRoutes);
+app.use('/addresses', addressRoutes);
 
 // Health Check Route
 app.get('/api/health', (req, res) => {
