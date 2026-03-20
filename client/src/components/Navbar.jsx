@@ -28,7 +28,7 @@ const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearc
                     </div>
 
                     <div className="header-nav">
-                        <div className="nav-item" onClick={() => setView(user ? 'orders' : 'login')}>
+                        <div className="nav-item" onClick={() => setView(user ? 'profile' : 'login')}>
                             <span className="nav-line-1">Hello, {user ? user.name : 'sign in'}</span>
                             <span className="nav-line-2">Account & Lists</span>
                         </div>

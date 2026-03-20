@@ -1,21 +1,31 @@
 import React from 'react';
 
 const Cart = ({ cart, onUpdateQty, onRemove, onClear, onCheckout, setView }) => {
-    const total = cart.reduce((sum, item) => sum + (item.quantity * (item.product?.price || 0)), 0);
+    if (!cart) return null;
+
+    const subtotal = cart.reduce((acc, item) => acc + (item.quantity * (item.product?.price || 0)), 0);
+
+    if (cart.length === 0) {
+        return (
+            <div className="container" style={{ padding: '80px 0', textAlign: 'center' }}>
+                <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🛒</div>
+                <h2 style={{ fontSize: '2rem', marginBottom: '10px' }}>Your Shopping Cart is Empty</h2>
+                <p className="text-muted" style={{ marginBottom: '30px' }}>Give it some love! Add some items to your cart and make it happy.</p>
+                <button
+                    className="btn-add-cart"
+                    style={{ maxWidth: '250px', margin: '0 auto' }}
+                    onClick={() => setView('home')}
+                >
+                    Continue Shopping
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="container mt-2">
             <h1 className="page-title">Shopping Cart</h1>
 
-            {cart.length === 0 ? (
-                <div className="cart-empty">
-                    <h2>Your ShopSmart Cart is empty.</h2>
-                    <p>Check your Saved items or continue shopping.</p>
-                    <button className="btn-add-cart mt-2" style={{ padding: '8px 20px' }} onClick={() => setView('home')}>
-                        Shop now
-                    </button>
-                </div>
-            ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '20px' }}>
                     <div className="cart-list" style={{ background: 'white', padding: '20px' }}>
                         {cart.map((item) => (
@@ -50,7 +60,7 @@ const Cart = ({ cart, onUpdateQty, onRemove, onClear, onCheckout, setView }) => 
                         ))}
 
                         <div style={{ textAlign: 'right', marginTop: '20px', fontSize: '1.2rem' }}>
-                            Subtotal ({cart.length} items): <strong>${total.toFixed(2)}</strong>
+                            Subtotal ({cart.length} items): <strong>${subtotal.toFixed(2)}</strong>
                         </div>
 
                         <button className="text-link" style={{ color: 'var(--accent)', marginTop: '20px' }} onClick={onClear}>
@@ -60,7 +70,7 @@ const Cart = ({ cart, onUpdateQty, onRemove, onClear, onCheckout, setView }) => 
 
                     <div style={{ background: 'white', padding: '20px', borderRadius: '4px', height: 'fit-content' }}>
                         <div style={{ fontSize: '1.2rem', marginBottom: '20px' }}>
-                            Subtotal: <strong>${total.toFixed(2)}</strong>
+                            Subtotal: <strong>${subtotal.toFixed(2)}</strong>
                         </div>
                         <button
                             className="btn-add-cart"
@@ -71,7 +81,6 @@ const Cart = ({ cart, onUpdateQty, onRemove, onClear, onCheckout, setView }) => 
                         </button>
                     </div>
                 </div>
-            )}
         </div>
     );
 };

@@ -13,6 +13,7 @@ export default defineConfig({
             '/products': { target: 'http://127.0.0.1:5001', changeOrigin: true },
             '/cart': { target: 'http://127.0.0.1:5001', changeOrigin: true },
             '/orders': { target: 'http://127.0.0.1:5001', changeOrigin: true },
+            '/addresses': { target: 'http://127.0.0.1:5001', changeOrigin: true },
         },
     },
     test: {

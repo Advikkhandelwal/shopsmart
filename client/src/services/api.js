@@ -56,6 +56,10 @@ export const authService = {
         body: JSON.stringify(userData),
     }),
     getProfile: () => apiCall('/users/profile'),
+    updateProfile: (userData) => apiCall('/users/profile', {
+        method: 'PUT',
+        body: JSON.stringify(userData),
+    }),
 };
 
 export const cartService = {
@@ -81,4 +85,29 @@ export const orderService = {
     checkout: (orderId) => apiCall(`/orders/${orderId}/checkout`, {
         method: 'POST',
     }),
+    updateOrderToPaid: (orderId, paymentData) => apiCall(`/orders/${orderId}/pay`, {
+        method: 'PUT',
+        body: JSON.stringify(paymentData),
+    }),
+};
+
+export const reviewsService = {
+    getForProduct: (productId) => apiCall(`/products/${productId}/reviews`),
+    create: (productId, reviewData) => apiCall(`/products/${productId}/reviews`, {
+        method: 'POST',
+        body: JSON.stringify(reviewData),
+    }),
+};
+
+export const addressService = {
+    getAll: () => apiCall('/addresses'),
+    create: (addressData) => apiCall('/addresses', {
+        method: 'POST',
+        body: JSON.stringify(addressData),
+    }),
+    update: (id, addressData) => apiCall(`/addresses/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(addressData),
+    }),
+    remove: (id) => apiCall(`/addresses/${id}`, { method: 'DELETE' }),
 };

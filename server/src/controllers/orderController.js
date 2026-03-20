@@ -5,8 +5,10 @@ const Product = require('../models/Product');
 const User = require('../models/User');
 function getStripe() {
     if (process.env.STRIPE_SECRET_KEY) {
+        // console.log('Stripe key found:', process.env.STRIPE_SECRET_KEY.substring(0, 7) + '...');
         return require('stripe')(process.env.STRIPE_SECRET_KEY);
     }
+    console.error('STRIPE_SECRET_KEY missing in process.env');
     return null;
 }
 
@@ -248,10 +250,10 @@ exports.createCheckoutSession = async (req, res) => {
 
         res.json({ id: session.id, url: session.url });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: error.message });
+        console.error('Stripe Session Error:', error);
+        res.status(500).json({ message: error.message || 'Error creating checkout session' });
     }
-};
+}
 
 // @desc    Stripe webhook – mark order paid on checkout.session.completed
 // @route   POST /orders/webhook (raw body; register before express.json())

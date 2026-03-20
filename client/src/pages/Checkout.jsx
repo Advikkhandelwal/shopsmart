@@ -33,7 +33,7 @@ const Checkout = ({ onPlaceOrder, loading, cart, onBack }) => {
                         <h2 style={{ margin: '30px 0 20px' }}>Payment Method</h2>
                         <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '4px', display: 'flex', gap: '10px', alignItems: 'center' }}>
                             <input type="radio" checked readOnly />
-                            <span>Pay with Stripe / Credit Card</span>
+                            <span>Payment Gateway (Credit/Debit Card)</span>
                         </div>
                     </form>
                 </div>

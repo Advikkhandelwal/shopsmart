@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { productsService, authService, cartService, orderService, setToken } from './services/api';
+import { productsService, authService, cartService, orderService, setToken, apiCall } from './services/api';
 
 // Components
 import Navbar from './components/Navbar';
@@ -13,6 +13,7 @@ import Orders from './pages/Orders';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Checkout from './pages/Checkout';
+import Profile from './pages/Profile';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -34,33 +35,42 @@ export default function App() {
   const [message, setMessage] = useState(null);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Sync URL with state helper (uses pushState for navigation history)
-  const navigateTo = useCallback((params) => {
-    const newParams = new URLSearchParams(window.location.search);
-    if (params.search !== undefined) {
-      if (params.search) newParams.set('search', params.search);
-      else newParams.delete('search');
-    }
-    if (params.category !== undefined) {
-      if (params.category) newParams.set('category', params.category);
-      else newParams.delete('category');
-    }
-    if (params.page !== undefined) {
-      if (params.page > 1) newParams.set('page', params.page);
-      else newParams.delete('page');
-    }
-    
-    // Always reset page to 1 if search or category changes, unless explicit
-    if ((params.search !== undefined || params.category !== undefined) && params.page === undefined) {
-      newParams.delete('page');
-    }
+  // --- Functions (Moved Up to avoid TDZ) ---
 
-    const newQuery = newParams.toString();
-    const newRelativePathQuery = window.location.pathname + (newQuery ? '?' + newQuery : '');
-    window.history.pushState(null, '', newRelativePathQuery);
-    
-    // Dispatch popstate manually so the reactive listener picks it up immediately
-    window.dispatchEvent(new Event('popstate'));
+  const showMessage = useCallback((msg, isError = false) => {
+    setMessage({ text: msg, error: isError });
+    setTimeout(() => setMessage(null), 4000);
+  }, []);
+
+  const loadProfile = useCallback(async () => {
+    try {
+      const userData = await authService.getProfile();
+      setUser(userData);
+    } catch (error) {
+      setToken(null);
+      setUser(null);
+    }
+  }, []);
+
+  const loadCart = useCallback(async () => {
+    try {
+      const data = await cartService.get();
+      setCart(data);
+    } catch (error) {
+      setCart([]);
+    }
+  }, []);
+
+  const loadOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await orderService.getMine();
+      setOrders(data);
+    } catch (error) {
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const loadProducts = useCallback(async (searchParams) => {
@@ -96,7 +106,38 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  }, [showMessage]);
+
+  // Sync URL with state helper (uses pushState for navigation history)
+  const navigateTo = useCallback((params) => {
+    const newParams = new URLSearchParams(window.location.search);
+    if (params.search !== undefined) {
+      if (params.search) newParams.set('search', params.search);
+      else newParams.delete('search');
+    }
+    if (params.category !== undefined) {
+      if (params.category) newParams.set('category', params.category);
+      else newParams.delete('category');
+    }
+    if (params.page !== undefined) {
+      if (params.page > 1) newParams.set('page', params.page);
+      else newParams.delete('page');
+    }
+    
+    // Always reset page to 1 if search or category changes, unless explicit
+    if ((params.search !== undefined || params.category !== undefined) && params.page === undefined) {
+      newParams.delete('page');
+    }
+
+    const newQuery = newParams.toString();
+    const newRelativePathQuery = window.location.pathname + (newQuery ? '?' + newQuery : '');
+    window.history.pushState(null, '', newRelativePathQuery);
+    
+    // Dispatch popstate manually so the reactive listener picks it up immediately
+    window.dispatchEvent(new Event('popstate'));
   }, []);
+
+  // --- Effects ---
 
   // Reactive effect: Listen to URL changes and fetch
   useEffect(() => {
@@ -114,10 +155,17 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [view, loadProducts]);
 
-  // OAuth callback
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
+
+  // OAuth & Stripe callback
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
+    const success = params.get('success');
+    const orderId = window.location.pathname.split('/order/')[1] || params.get('orderId');
+
     if (token) {
       setToken(token);
       const newParams = new URLSearchParams(window.location.search);
@@ -127,47 +175,36 @@ export default function App() {
       setView('home');
       loadProfile();
     }
-  }, []);
+
+    if (success === 'true' && orderId) {
+      // Simulation: Mark order as paid immediately since we might not have a public webhook URL
+      orderService.updateOrderToPaid(orderId, { status: 'success' })
+        .then(() => {
+          showMessage('Payment successful! Your order is being processed.');
+          setView('orders');
+          loadOrders();
+        })
+        .catch(() => {});
+      
+      const newParams = new URLSearchParams(window.location.search);
+      newParams.delete('success');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [loadProfile, loadOrders, showMessage]);
 
   useEffect(() => {
     productsService.getCategories().then(setCategories).catch(() => setCategories([]));
-  }, []);
-
-  const cartCount = cart.reduce((n, i) => n + (i.quantity || 0), 0);
-
-  const loadCart = useCallback(async () => {
-    try {
-      const data = await cartService.get();
-      setCart(data);
-    } catch (error) {
-      setCart([]);
-    }
   }, []);
 
   useEffect(() => {
     if (view === 'cart' || view === 'checkout' || view === 'home') loadCart();
   }, [view, loadCart]);
 
-  const loadOrders = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await orderService.getMine();
-      setOrders(data);
-    } catch (error) {
-      setOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     if (view === 'orders') loadOrders();
   }, [view, loadOrders]);
 
-  const showMessage = (msg, isError = false) => {
-    setMessage({ text: msg, error: isError });
-    setTimeout(() => setMessage(null), 4000);
-  };
+  // --- Handlers ---
 
   const openProduct = async (id) => {
     setLoading(true);
@@ -252,8 +289,7 @@ export default function App() {
           return;
         }
       } catch (err) {
-        // If Stripe is not configured or fails, fall back to marking order as placed
-        // and just show the local orders list.
+        // If Stripe is not configured or fails, fallback
       }
 
       setCart([]);
@@ -265,6 +301,8 @@ export default function App() {
       setLoading(false);
     }
   };
+
+  const cartCount = Array.isArray(cart) ? cart.reduce((n, i) => n + (i.quantity || 0), 0) : 0;
 
   return (
     <>
@@ -313,6 +351,7 @@ export default function App() {
             loading={loading}
             onAddToCart={addToCart}
             onBack={() => setView('home')}
+            user={user}
           />
         )}
 
@@ -359,6 +398,14 @@ export default function App() {
             orders={orders}
             loading={loading}
             setView={setView}
+          />
+        )}
+
+        {view === 'profile' && (
+          <Profile
+            user={user}
+            onUpdateUser={setUser}
+            onBack={() => setView('home')}
           />
         )}
       </main>

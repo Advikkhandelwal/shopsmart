@@ -1,7 +1,14 @@
 import React from 'react';
 
 const Orders = ({ orders, loading, setView }) => {
-    if (loading) return <div className="container mt-2">Loading your orders...</div>;
+    if (loading) return (
+        <div className="container mt-2">
+            <h1 className="page-title">Your Orders</h1>
+            {[1,2,3].map(i => (
+                <div key={i} className="loading-pulse" style={{ height: '150px', borderRadius: '8px', marginBottom: '20px' }}></div>
+            ))}
+        </div>
+    );
 
     return (
         <div className="container mt-2">
