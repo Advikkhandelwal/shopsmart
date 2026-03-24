@@ -5,7 +5,6 @@ const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const { sequelize, User, Product } = require('./models/index');
 const fs = require('fs');
-const path = require('path');
 const { parse } = require('csv-parse/sync');
 const { execSync } = require('child_process');
 
