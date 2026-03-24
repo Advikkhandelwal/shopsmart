@@ -22,7 +22,7 @@ const Cart = sequelize.define('Cart', {
         allowNull: false,
     },
 }, {
-    timestamps: true, // Keep track of when item was added
+    timestamps: true, 
 });
 
 module.exports = Cart;

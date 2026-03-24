@@ -1,3 +1,6 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+
 const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const { sequelize, User, Product } = require('./models/index');

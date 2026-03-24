@@ -5,7 +5,6 @@ const Product = require('../models/Product');
 const User = require('../models/User');
 function getStripe() {
     if (process.env.STRIPE_SECRET_KEY) {
-        // console.log('Stripe key found:', process.env.STRIPE_SECRET_KEY.substring(0, 7) + '...');
         return require('stripe')(process.env.STRIPE_SECRET_KEY);
     }
     console.error('STRIPE_SECRET_KEY missing in process.env');
@@ -249,9 +248,10 @@ exports.createCheckoutSession = async (req, res) => {
         });
 
         res.json({ id: session.id, url: session.url });
-    } catch (error) {
+    } 
+    catch (error) {
         console.error('Stripe Session Error:', error);
-        res.status(500).json({ message: error.message || 'Error creating checkout session' });
+        res.status(500).json({ message: error.message || 'Error creating checkout session'});
     }
 }
 

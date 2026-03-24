@@ -9,6 +9,7 @@ exports.getCategories = async (req, res) => {
     const products = await Product.findAll({
       attributes: ['category'],
       where: { category: { [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: '' }] } },
+      // used to return plain objects instead of Sequelize instances
       raw: true,
     });
     const set = new Set(products.map((p) => p.category).filter(Boolean));
@@ -43,10 +44,8 @@ exports.getProducts = async (req, res) => {
       where.category = category.trim();
     }
 
-    const min =
-      minPrice != null && !isNaN(Number(minPrice)) ? Number(minPrice) : null;
-    const max =
-      maxPrice != null && !isNaN(Number(maxPrice)) ? Number(maxPrice) : null;
+    const min = minPrice != null && !isNaN(Number(minPrice)) ? Number(minPrice) : null;
+    const max = maxPrice != null && !isNaN(Number(maxPrice)) ? Number(maxPrice) : null;
     if (min != null || max != null) {
       where.price = {};
       if (min != null) where.price[Op.gte] = min;

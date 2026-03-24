@@ -15,8 +15,15 @@ const { stripeWebhook } = require('./controllers/orderController');
 
 const app = express();
 
-app.use(cors());
-// Stripe webhook needs raw body for signature verification (must be before express.json())
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
 app.post('/orders/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
 app.use(express.json());
 app.use(passport.initialize());

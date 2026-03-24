@@ -12,7 +12,6 @@ const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearc
                     }}>
                         ShopSmart
                     </a>
-
                     <div className="search-bar">
                         <input
                             type="text"

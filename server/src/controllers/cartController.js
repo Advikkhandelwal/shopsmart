@@ -7,6 +7,7 @@ const User = require('../models/User');
 exports.getCart = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id, {
+            // include triggers the join , it tell sequalize to fetch all Products related to this user through the cartItems relation
             include: {
                 model: Product,
                 as: 'cartItems',
@@ -125,7 +126,8 @@ exports.removeFromCart = async (req, res) => {
 
         if (deleted) {
             res.json({ message: 'Item removed' });
-        } else {
+        } 
+        else {
             res.status(404).json({ message: 'Item not found in cart' });
         }
     } catch (error) {
