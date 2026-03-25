@@ -27,7 +27,7 @@ router.get('/google/callback',
 
         // Redirect to frontend with token
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        res.redirect(`${frontendUrl}/login?token=${token}`);
+        res.redirect(`${frontendUrl}/?token=${token}`);
     }
 );
 
