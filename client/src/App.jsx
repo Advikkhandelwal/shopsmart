@@ -220,7 +220,7 @@ export default function App() {
   };
 
   const addToCart = async (productId, quantity = 1) => {
-    if (!localStorage.getItem('token')) {
+    if (!user) {
       setView('login');
       return;
     }
