@@ -144,7 +144,9 @@ async function loadProductsFromKaggleCsv(limit = 1000) {
       price,
       category: categoryFromTree(r.product_category_tree) || (r.brand ? String(r.brand) : 'General'),
       stock: Math.floor(Math.random() * 100) + 10,
-      imageUrl,
+      imageUrl: imageUrl && imageUrl.startsWith('http://') 
+        ? `https://images.weserv.nl/?url=${imageUrl}` 
+        : imageUrl,
     });
     if (mapped.length >= limit) break;
   }
