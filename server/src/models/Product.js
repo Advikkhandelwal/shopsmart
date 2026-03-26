@@ -37,6 +37,11 @@ const Product = sequelize.define('Product', {
     imageUrl: {
         type: DataTypes.STRING,
     },
+}, {
+    indexes: [
+        { fields: ['category'] },
+        { fields: ['name'] },
+    ]
 });
 
 module.exports = Product;

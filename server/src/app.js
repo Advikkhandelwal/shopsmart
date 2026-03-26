@@ -1,6 +1,8 @@
 const express = require('express');
 require('express-async-errors');
 const cors = require('cors');
+const compression = require('compression');
+const helmet = require('helmet');
 const passport = require('passport');
 require('./config/passport');
 
@@ -20,6 +22,10 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP for now to avoid issues with external images/scripts
+}));
+app.use(compression());
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,

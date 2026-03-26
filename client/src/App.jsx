@@ -1,19 +1,19 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { productsService, authService, cartService, orderService, setToken, apiCall } from './services/api';
 
 // Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
-// Pages
-import Home from './pages/Home';
-import ProductDetail from './pages/ProductDetail';
-import Cart from './pages/Cart';
-import Orders from './pages/Orders';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Checkout from './pages/Checkout';
-import Profile from './pages/Profile';
+// Pages - Lazy Loaded
+const Home = lazy(() => import('./pages/Home'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Orders = lazy(() => import('./pages/Orders'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Profile = lazy(() => import('./pages/Profile'));
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -243,7 +243,6 @@ export default function App() {
       loadCart();
     } catch (e) {
       showMessage(e.message, true);
-      window.alert('Error: ' + e.message);
     }
   };
 
@@ -340,88 +339,94 @@ export default function App() {
           </div>
         )}
 
-        {view === 'home' && (
-          <Home 
-            products={products} 
-            loading={loading}
-            onProductClick={openProduct}
-            onAddToCart={addToCart}
-            page={page}
-            totalPages={totalPages}
-            showSections={!search && !category}
-            categories={categories}
-            onSelectCategory={(cat) => {
-              navigateTo({ category: cat, search: '', page: 1 });
-            }}
-            onPageChange={(p) => {
-              navigateTo({ page: p });
-            }}
-          />
-        )}
+        <Suspense fallback={
+          <div className="container" style={{ padding: '60px 0' }}>
+            <div className="loading-pulse" style={{ height: '400px', borderRadius: '20px' }}></div>
+          </div>
+        }>
+          {view === 'home' && (
+            <Home 
+              products={products} 
+              loading={loading}
+              onProductClick={openProduct}
+              onAddToCart={addToCart}
+              page={page}
+              totalPages={totalPages}
+              showSections={!search && !category}
+              categories={categories}
+              onSelectCategory={(cat) => {
+                navigateTo({ category: cat, search: '', page: 1 });
+              }}
+              onPageChange={(p) => {
+                navigateTo({ page: p });
+              }}
+            />
+          )}
 
-        {view === 'product' && (
-          <ProductDetail 
-            product={product} 
-            loading={loading}
-            onAddToCart={addToCart}
-            onBack={() => setView('home')}
-            user={user}
-          />
-        )}
+          {view === 'product' && (
+            <ProductDetail 
+              product={product} 
+              loading={loading}
+              onAddToCart={addToCart}
+              onBack={() => setView('home')}
+              user={user}
+            />
+          )}
 
-        {view === 'cart' && (
-          <Cart 
-            cart={cart}
-            onUpdateQty={(pid, qty) => cartService.update(pid, qty).then(loadCart)}
-            onRemove={(pid) => cartService.remove(pid).then(loadCart)}
-            onClear={() => cartService.clear().then(() => setCart([]))}
-            onCheckout={() => setView('checkout')}
-            setView={setView}
-          />
-        )}
+          {view === 'cart' && (
+            <Cart 
+              cart={cart}
+              onUpdateQty={(pid, qty) => cartService.update(pid, qty).then(loadCart)}
+              onRemove={(pid) => cartService.remove(pid).then(loadCart)}
+              onClear={() => cartService.clear().then(() => setCart([]))}
+              onCheckout={() => setView('checkout')}
+              setView={setView}
+            />
+          )}
 
-        {view === 'checkout' && (
-          <Checkout 
-            cart={cart}
-            onPlaceOrder={placeOrder}
-            loading={loading}
-            onBack={() => setView('home')}
-          />
-        )}
+          {view === 'checkout' && (
+            <Checkout 
+              cart={cart}
+              onPlaceOrder={placeOrder}
+              loading={loading}
+              onBack={() => setView('home')}
+            />
+          )}
 
-        {view === 'login' && (
-          <Login 
-            onLogin={handleLogin}
-            setView={setView}
-            loading={loading}
-            API_URL={API_URL}
-          />
-        )}
+          {view === 'login' && (
+            <Login 
+              onLogin={handleLogin}
+              setView={setView}
+              loading={loading}
+              API_URL={API_URL}
+            />
+          )}
 
-        {view === 'register' && (
-          <Register 
-            onRegister={handleRegister}
-            setView={setView}
-            loading={loading}
-            API_URL={API_URL}
-          />
-        )}
+          {view === 'register' && (
+            <Register 
+              onRegister={handleRegister}
+              setView={setView}
+              loading={loading}
+              API_URL={API_URL}
+            />
+          )}
 
-        {view === 'orders' && (
-          <Orders 
-            orders={orders}
-            loading={loading}
-            setView={setView}
-          />
-        )}
+          {view === 'orders' && (
+            <Orders 
+              orders={orders}
+              loading={loading}
+              setView={setView}
+            />
+          )}
 
-        {view === 'profile' && (
-          <Profile 
-            user={user}
-            onUpdateUser={setUser}
-            onBack={() => setView('home')}
-          />
-        )}
+          {view === 'profile' && (
+            <Profile 
+              user={user}
+              onUpdateUser={setUser}
+              onBack={() => setView('home')}
+            />
+          )}
+        </Suspense>
       </main>
 
       <Footer />

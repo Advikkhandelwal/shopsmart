@@ -1,19 +1,27 @@
 const { Op } = require('sequelize');
 const { Product, Review } = require('../models');
 
-// @desc    Get distinct categories
-// @route   GET /products/categories
-// @access  Public
+let cachedCategories = null;
+let lastCacheTime = 0;
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
 exports.getCategories = async (req, res) => {
   try {
+    const now = Date.now();
+    if (cachedCategories && (now - lastCacheTime < CACHE_TTL)) {
+      return res.json(cachedCategories);
+    }
+
     const products = await Product.findAll({
       attributes: ['category'],
       where: { category: { [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: '' }] } },
-      // used to return plain objects instead of Sequelize instances
       raw: true,
     });
     const set = new Set(products.map((p) => p.category).filter(Boolean));
-    res.json([...set].sort());
+    cachedCategories = [...set].sort();
+    lastCacheTime = now;
+    
+    res.json(cachedCategories);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

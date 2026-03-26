@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { memo } from 'react';
 
-const ProductCard = ({ product, onClick, onAddToCart }) => {
+const ProductCard = memo(({ product, onClick, onAddToCart }) => {
     return (
         <div className="product-card" onClick={() => onClick(product.id)}>
             <div className="product-image-wrapper">
@@ -8,6 +8,7 @@ const ProductCard = ({ product, onClick, onAddToCart }) => {
                     src={product.imageUrl || 'https://placehold.co/400?text=No+image'}
                     alt={product.name}
                     className="product-image"
+                    loading="lazy"
                 />
             </div>
             <h3 className="product-title">{product.name}</h3>
@@ -25,6 +26,6 @@ const ProductCard = ({ product, onClick, onAddToCart }) => {
             </button>
         </div>
     );
-};
+});
 
 export default ProductCard;
