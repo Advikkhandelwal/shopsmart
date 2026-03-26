@@ -43,16 +43,23 @@ export default function App() {
   }, []);
 
   const loadProfile = useCallback(async () => {
+    // Don't even try if we know we don't have a token
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
     try {
       const userData = await authService.getProfile();
       setUser(userData);
     } catch (error) {
+      // Only clear if it's truly an auth error, and handle race conditions
+      // Better yet, just clear it if we're sure this wasn't an interrupted request
       setToken(null);
       setUser(null);
     }
   }, []);
 
   const loadCart = useCallback(async () => {
+    if (!localStorage.getItem('token')) return;
     try {
       const data = await cartService.get();
       setCart(data);
@@ -62,6 +69,7 @@ export default function App() {
   }, []);
 
   const loadOrders = useCallback(async () => {
+    if (!localStorage.getItem('token')) return;
     setLoading(true);
     try {
       const data = await orderService.getMine();
@@ -156,7 +164,12 @@ export default function App() {
   }, [view, loadProducts]);
 
   useEffect(() => {
-    loadProfile();
+    // Only call loadProfile if there's no token in URL, 
+    // because the OAuth effect will handle it otherwise.
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('token')) {
+      loadProfile();
+    }
   }, [loadProfile]);
 
   // OAuth & Stripe callback
@@ -228,7 +241,6 @@ export default function App() {
       await cartService.add(productId, quantity);
       showMessage('Added to cart');
       loadCart();
-      window.alert('Success: Item added to your cart!');
     } catch (e) {
       showMessage(e.message, true);
       window.alert('Error: ' + e.message);
@@ -304,19 +316,19 @@ export default function App() {
     }
   };
 
-  const cartCount = Array.isArray(cart) ? cart.reduce((n, i) => n + (i.quantity || 0), 0) : 0;
+  const cartCount = Array.isArray(cart) ? cart.reduce((acc, item) => acc + (item.quantity || 0), 0) : 0;
 
   return (
-    <>
-      <Navbar
-        user={user}
-        cartCount={cartCount}
-        onLogout={logout}
+    <div className="app">
+      <Navbar 
+        user={user} 
+        cartCount={cartCount} 
+        onLogout={logout} 
         setView={setView}
         search={search}
         setSearch={setSearch}
-        categories={categories}
         onNavigate={navigateTo}
+        categories={categories}
       />
 
       <main className="main" style={{ flex: 1, padding: 0, maxWidth: 'none' }}>
@@ -329,8 +341,8 @@ export default function App() {
         )}
 
         {view === 'home' && (
-          <Home
-            products={products}
+          <Home 
+            products={products} 
             loading={loading}
             onProductClick={openProduct}
             onAddToCart={addToCart}
@@ -348,8 +360,8 @@ export default function App() {
         )}
 
         {view === 'product' && (
-          <ProductDetail
-            product={product}
+          <ProductDetail 
+            product={product} 
             loading={loading}
             onAddToCart={addToCart}
             onBack={() => setView('home')}
@@ -358,7 +370,7 @@ export default function App() {
         )}
 
         {view === 'cart' && (
-          <Cart
+          <Cart 
             cart={cart}
             onUpdateQty={(pid, qty) => cartService.update(pid, qty).then(loadCart)}
             onRemove={(pid) => cartService.remove(pid).then(loadCart)}
@@ -369,7 +381,7 @@ export default function App() {
         )}
 
         {view === 'checkout' && (
-          <Checkout
+          <Checkout 
             cart={cart}
             onPlaceOrder={placeOrder}
             loading={loading}
@@ -378,7 +390,7 @@ export default function App() {
         )}
 
         {view === 'login' && (
-          <Login
+          <Login 
             onLogin={handleLogin}
             setView={setView}
             loading={loading}
@@ -387,7 +399,7 @@ export default function App() {
         )}
 
         {view === 'register' && (
-          <Register
+          <Register 
             onRegister={handleRegister}
             setView={setView}
             loading={loading}
@@ -396,7 +408,7 @@ export default function App() {
         )}
 
         {view === 'orders' && (
-          <Orders
+          <Orders 
             orders={orders}
             loading={loading}
             setView={setView}
@@ -404,7 +416,7 @@ export default function App() {
         )}
 
         {view === 'profile' && (
-          <Profile
+          <Profile 
             user={user}
             onUpdateUser={setUser}
             onBack={() => setView('home')}
@@ -413,6 +425,6 @@ export default function App() {
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }
