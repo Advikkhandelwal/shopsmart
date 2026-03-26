@@ -228,8 +228,10 @@ export default function App() {
       await cartService.add(productId, quantity);
       showMessage('Added to cart');
       loadCart();
+      window.alert('Success: Item added to your cart!');
     } catch (e) {
       showMessage(e.message, true);
+      window.alert('Error: ' + e.message);
     }
   };
 
