@@ -16,6 +16,15 @@ export default defineConfig({
             '/addresses': { target: 'http://127.0.0.1:5001', changeOrigin: true },
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    vendor: ['react', 'react-dom']
+                }
+            }
+        }
+    },
     test: {
         globals: true,
         environment: 'jsdom',
