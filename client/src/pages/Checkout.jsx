@@ -49,7 +49,7 @@ const Checkout = ({ onPlaceOrder, loading, cart, onBack }) => {
                         {loading ? 'Processing...' : 'Place your order'}
                     </button>
                     <p style={{ fontSize: '0.75rem', textAlign: 'center', marginBottom: '15px' }}>
-                        By placing your order, you agree to ShopSmart's privacy notice and conditions of use.
+                        By placing your order, you agree to ShopSmart&apos;s privacy notice and conditions of use.
                     </p>
                     <hr style={{ border: '0', borderTop: '1px solid #eee', marginBottom: '15px' }} />
                     <h3>Order Summary</h3>

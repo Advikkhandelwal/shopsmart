@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, onSearch, categories, onNavigate }) => {
+const Navbar = ({ user, cartCount, onLogout, setView, search, setSearch, categories, onNavigate }) => {
     return (
         <header className="header">
             <div className="container">

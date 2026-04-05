@@ -30,4 +30,5 @@ const ProductCard = memo(({ product, onClick, onAddToCart }) => {
     );
 });
 
+ProductCard.displayName = 'ProductCard';
 export default ProductCard;

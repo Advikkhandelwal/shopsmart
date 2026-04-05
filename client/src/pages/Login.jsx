@@ -20,7 +20,7 @@ const Login = ({ onLogin, setView, loading, API_URL }) => {
                 </form>
 
                 <p style={{ fontSize: '0.8rem', marginTop: '15px', color: 'var(--text-muted)' }}>
-                    By continuing, you agree to ShopSmart's Conditions of Use and Privacy Notice.
+                    By continuing, you agree to ShopSmart&apos;s Conditions of Use and Privacy Notice.
                 </p>
 
                 <div style={{ marginTop: '20px', textAlign: 'center' }}>

@@ -16,7 +16,7 @@ const Orders = ({ orders, loading, setView }) => {
 
             {orders.length === 0 ? (
                 <div className="orders-empty" style={{ background: 'white', padding: '40px', borderRadius: '4px' }}>
-                    <p>You haven't placed any orders in the past 3 months.</p>
+                    <p>You haven&apos;t placed any orders in the past 3 months.</p>
                     <button className="btn-add-cart mt-2" style={{ padding: '8px 20px' }} onClick={() => setView('home')}>
                         Continue shopping
                     </button>

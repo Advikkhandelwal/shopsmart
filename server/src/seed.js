@@ -74,8 +74,8 @@ function parseImageUrl(imageField) {
   try {
     const arr = JSON.parse(s);
     if (Array.isArray(arr) && arr.length > 0) return arr[0] || null;
-  } 
-  catch (e) {}
+    } 
+    catch { /* ignore */ }
 
   const m = s.match(/https?:\/\/[^"'\s\]]+/);
   return m ? m[0] : null;
@@ -207,7 +207,7 @@ const seedData = async () => {
         headers: { Accept: 'application/json' },
       });
       externalProducts = Array.isArray(data.products) ? data.products : [];
-    } catch (err) {
+    } catch {
       console.warn('External product seed failed, using fallback products.');
       externalProducts = [];
     }

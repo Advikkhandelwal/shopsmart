@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { productsService, authService, cartService, orderService, setToken, apiCall } from './services/api';
+import { productsService, authService, cartService, orderService, setToken } from './services/api';
 
 // Components
 import Navbar from './components/Navbar';
@@ -302,6 +302,7 @@ export default function App() {
           return;
         }
       } catch (err) {
+        // ignore
       }
 
       setCart([]);
