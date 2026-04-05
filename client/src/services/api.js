@@ -98,6 +98,7 @@ export const reviewsService = {
         body: JSON.stringify(reviewData),
     }),
 };
+// ex=> GET /products/10/reviews
 
 export const addressService = {
     getAll: () => apiCall('/addresses'),

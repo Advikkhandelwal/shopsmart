@@ -6,7 +6,9 @@ const axios = require('axios');
 const { sequelize, User, Product } = require('./models/index');
 const fs = require('fs');
 const { parse } = require('csv-parse/sync');
+// reading CSV
 const { execSync } = require('child_process');
+// helps to run terminal/OS commands from Node.js
 
 const fallbackProducts = [
   {
@@ -68,14 +70,13 @@ function safeNumber(v) {
 function parseImageUrl(imageField) {
   if (!imageField) return null;
   const s = String(imageField).trim();
-  // Field looks like: ["http://...", "http://..."]
-  // Sometimes it's already a url, sometimes malformed JSON. Try JSON first.
+  // "Find a URL starting with http/https and keep reading characters until you hit a space, quote, or ]"
   try {
     const arr = JSON.parse(s);
     if (Array.isArray(arr) && arr.length > 0) return arr[0] || null;
-  } catch (e) {
-    // ignore
-  }
+  } 
+  catch (e) {}
+
   const m = s.match(/https?:\/\/[^"'\s\]]+/);
   return m ? m[0] : null;
 }
@@ -116,6 +117,7 @@ async function loadProductsFromKaggleCsv(limit = 1000) {
   if (!ensureKaggleData()) return [];
   const csv = fs.readFileSync(kaggleCsvPath, 'utf8');
   const records = parse(csv, { columns: true, skip_empty_lines: true });
+  //  parsing from csv to objects
   const mapped = [];
   const uniqueNames = new Set();
 
@@ -145,6 +147,7 @@ async function loadProductsFromKaggleCsv(limit = 1000) {
       category: categoryFromTree(r.product_category_tree) || (r.brand ? String(r.brand) : 'General'),
       stock: Math.floor(Math.random() * 100) + 10,
       imageUrl: imageUrl && imageUrl.startsWith('http://') 
+      // Some sites block http, This proxy makes it safe
         ? `https://images.weserv.nl/?url=${imageUrl}` 
         : imageUrl,
     });
@@ -156,6 +159,7 @@ async function loadProductsFromKaggleCsv(limit = 1000) {
 const seedData = async () => {
   try {
     await sequelize.sync({ force: true });
+    // Drops all tables and Recreates them
     console.log('Database synced');
 
     const hashedPassword = await bcrypt.hash('admin123', 10);
@@ -178,7 +182,6 @@ const seedData = async () => {
 
     console.log('Users seeded (admin@example.com / admin123, john@example.com / user123)');
 
-    // Prefer Kaggle CSV if present
     const kaggleLimitRaw = process.env.SEED_KAGGLE_LIMIT;
     const kaggleLimit = kaggleLimitRaw != null ? Number(kaggleLimitRaw) : 1000;
     console.log(`Loading up to ${kaggleLimit} products from Kaggle dataset...`);

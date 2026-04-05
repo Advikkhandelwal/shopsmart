@@ -10,11 +10,13 @@ const ProductCard = memo(({ product, onClick, onAddToCart }) => {
                     className="product-image"
                     loading="lazy"
                 />
+                {/* image visble only when the come to viewport */}
             </div>
             <h3 className="product-title">{product.name}</h3>
             <div className="product-price">
                 {Number(product.price).toFixed(2)}
             </div>
+            {/* without stopPropagation Add item to cart and also trigger parent click*/}
             <button
                 className="btn-add-cart"
                 onClick={(e) => {

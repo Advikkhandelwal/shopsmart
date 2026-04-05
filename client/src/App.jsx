@@ -28,6 +28,7 @@ export default function App() {
 
   // Initialize filters from URL
   const initialParams = new URLSearchParams(window.location.search);
+  // Reads the query string from the URL
   const [search, setSearch] = useState(initialParams.get('search') || '');
   const [category, setCategory] = useState(initialParams.get('category') || '');
   const [page, setPage] = useState(Number(initialParams.get('page')) || 1);
@@ -43,7 +44,6 @@ export default function App() {
   }, []);
 
   const loadProfile = useCallback(async () => {
-    // Don't even try if we know we don't have a token
     const token = localStorage.getItem('token');
     if (!token) return;
 
@@ -248,6 +248,7 @@ export default function App() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    //It stops the browser’s default Reloading the page
     const { email, password } = e.target;
     setLoading(true);
     try {
@@ -291,7 +292,6 @@ export default function App() {
     const address = e.target?.shippingAddress?.value || '';
     setLoading(true);
     try {
-      // Create order from cart
       const order = await orderService.place(address);
 
       // Try to start Stripe Checkout if configured
@@ -302,7 +302,6 @@ export default function App() {
           return;
         }
       } catch (err) {
-        // If Stripe is not configured or fails, fallback
       }
 
       setCart([]);
