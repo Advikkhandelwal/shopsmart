@@ -7,13 +7,13 @@ export default defineConfig({
     server: {
         port: 5173,
         proxy: {
-            '/api': { target: 'http://127.0.0.1:5001', changeOrigin: true },
-            '/auth': { target: 'http://127.0.0.1:5001', changeOrigin: true },
-            '/users': { target: 'http://127.0.0.1:5001', changeOrigin: true },
-            '/products': { target: 'http://127.0.0.1:5001', changeOrigin: true },
-            '/cart': { target: 'http://127.0.0.1:5001', changeOrigin: true },
-            '/orders': { target: 'http://127.0.0.1:5001', changeOrigin: true },
-            '/addresses': { target: 'http://127.0.0.1:5001', changeOrigin: true },
+            '/api': { target: process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:5001', changeOrigin: true },
+            '/auth': { target: process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:5001', changeOrigin: true },
+            '/users': { target: process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:5001', changeOrigin: true },
+            '/products': { target: process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:5001', changeOrigin: true },
+            '/cart': { target: process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:5001', changeOrigin: true },
+            '/orders': { target: process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:5001', changeOrigin: true },
+            '/addresses': { target: process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:5001', changeOrigin: true },
         },
     },
     build: {

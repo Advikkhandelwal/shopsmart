@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: ./server
+      target: dev
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - PORT=5001
+      - FRONTEND_URL=http://localhost:5173
+      - BACKEND_URL=http://localhost:5001
+      - CHOKIDAR_USEPOLLING=true
+
+  client:
+    build:
+      context: ./client
+      target: dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - VITE_PROXY_TARGET=http://server:5001
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - server

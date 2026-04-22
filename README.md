@@ -1,6 +1,6 @@
 # ShopSmart
 
-Hey there! Welcome to the repository for ShopSmart. This is a full-stack, modern e-commerce platform that I built to replicate a premium online shopping experience. The main goal of this project was to focus heavily on a clean, dynamic user interface while making sure the backend is robust enough to handle products, carts, complex authentication and payments efficiently.
+Welcome to the repository for ShopSmart. This is a full-stack, modern e-commerce platform that I built to replicate a premium online shopping experience. The main goal of this project was to focus heavily on a clean, dynamic user interface while making sure the backend is robust enough to handle products, carts, complex authentication and payments efficiently.
 
 ## What's it built with?
 
