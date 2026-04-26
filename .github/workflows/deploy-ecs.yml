@@ -7,10 +7,10 @@ on:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}                   # set this to your preferred AWS region, e.g. us-east-1
-  ECR_REPOSITORY_SERVER: shopmart-server                  # set this to your Amazon ECR repository name for the server
-  ECR_REPOSITORY_CLIENT: shopmart-client                  # set this to your Amazon ECR repository name for the client
-  ECS_SERVICE: shopmart-service                           # set this to your Amazon ECS service name
-  ECS_CLUSTER: shopmart-cluster                           # set this to your Amazon ECS cluster name
+  ECR_REPOSITORY_SERVER: shopsmart-server                 # set this to your Amazon ECR repository name for the server
+  ECR_REPOSITORY_CLIENT: shopsmart-client                 # set this to your Amazon ECR repository name for the client
+  ECS_SERVICE: shopsmart-server-service-mf6sasid          # set this to your Amazon ECS service name
+  ECS_CLUSTER: shopsmart-cluster-2                        # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: .aws/task-definition.json          # set this to the path to your Amazon ECS task definition
   CONTAINER_NAME_SERVER: server                           # set this to the name of the container in the task definition
   CONTAINER_NAME_CLIENT: client                           # set this to the name of the container in the task definition
