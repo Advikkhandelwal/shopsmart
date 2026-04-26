@@ -60,3 +60,33 @@ The frontend should quickly spin up on `http://localhost:5173`. The Vite configu
 ## Testing & Automation 
 
 A reliable pipeline is important, so this repository utilizes a GitHub Actions CI/CD pipeline. Every time code is pushed or a pull request is raised to `main`, the pipeline will automatically check for any linting errors using ESLint and execute both the client-side (Vitest) and server-side (Jest) test suites to make sure nothing gets broken by accident. 
+
+## AWS ECS Deployment
+
+This repository includes a fully automated CI/CD deployment pipeline to **AWS ECR and ECS via Fargate**, allowing for a robust, production-ready environment. The pipeline builds the `server` and `client` Docker images, pushes them to an Elastic Container Registry (ECR), and automatically updates the Elastic Container Service (ECS) tasks.
+
+### Prerequisites (AWS Setup)
+
+To use the automated deployment, you must have the following resources created in your AWS account:
+
+1. **ECR Repositories:** Create two private ECR repositories:
+   - `shopmart-server`
+   - `shopmart-client`
+2. **ECS Cluster:** Create an ECS cluster named `shopmart-cluster` using AWS Fargate.
+3. **IAM Roles:** Ensure you have an `ecsTaskExecutionRole` with permissions to pull from ECR and stream logs to CloudWatch.
+4. **CloudWatch Logs:** The task definition will automatically stream logs to `/ecs/shopmart-task`.
+5. **ECS Service:** Create an ECS service named `shopmart-service` based on the `.aws/task-definition.json` template.
+
+### GitHub Actions Configuration
+
+Once your AWS infrastructure is set up, you need to configure your GitHub repository to securely authenticate with AWS. Navigate to **Settings > Secrets and variables > Actions** in your GitHub repository and add the following repository secrets:
+
+- `AWS_ACCESS_KEY_ID`: An IAM user access key with permissions to push to ECR and deploy to ECS.
+- `AWS_SECRET_ACCESS_KEY`: The corresponding secret access key.
+- `AWS_REGION`: Your target AWS region (e.g., `us-east-1`).
+
+### Task Definition
+
+A template is provided in `.aws/task-definition.json`. You must replace `<YOUR_AWS_ACCOUNT_ID>` with your actual AWS 12-digit account ID before the initial deployment or if you plan to update the base infrastructure.
+
+The deployment workflow `.github/workflows/deploy-ecs.yml` will trigger automatically upon a push to the `main` branch, ensuring your application is always up to date.
