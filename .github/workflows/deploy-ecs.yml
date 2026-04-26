@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}                   # set this to your preferred AWS region, e.g. us-east-1
+  AWS_REGION: "us-east-1"                                 # Hardcoded to us-east-1 for AWS Academy
   AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}     # added for AWS Academy / Learner Lab temporary credentials
   ECR_REPOSITORY_SERVER: shopsmart-server                 # set this to your Amazon ECR repository name for the server
   ECR_REPOSITORY_CLIENT: shopsmart-client                 # set this to your Amazon ECR repository name for the client
